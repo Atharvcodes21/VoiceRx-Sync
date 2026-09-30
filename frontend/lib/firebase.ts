@@ -3,14 +3,25 @@ import { initializeApp, getApps } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY            || "AIzaSyBZpNUcc4q66rIl6_1-_vIIK1Om3XEsWYw",
-  authDomain:        process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN        || "voicerx-62c31.firebaseapp.com",
-  projectId:         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID         || "voicerx-62c31",
-  storageBucket:     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET     || "voicerx-62c31.firebasestorage.app",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "218772486202",
-  appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID             || "1:218772486202:web:dac1194309069f50c81d03",
+  apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
+  authDomain:        process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
+  projectId:         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
+  storageBucket:     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
+  appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Safe initialization (avoids crash during static prerender if env vars are being injected at runtime)
+const app = getApps().length === 0
+  ? initializeApp(firebaseConfig.apiKey ? firebaseConfig : {
+      apiKey: "dummy-key-for-build",
+      authDomain: "dummy.firebaseapp.com",
+      projectId: "dummy-project",
+      storageBucket: "dummy.firebasestorage.app",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:dummy"
+    })
+  : getApps()[0];
+
 export const auth     = getAuth(app);
 export const provider = new GoogleAuthProvider();

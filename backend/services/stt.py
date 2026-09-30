@@ -27,7 +27,8 @@ def get_groq_client() -> Groq:
 
 def save_audio_file(audio_bytes: bytes, filename: str = "recording.webm") -> str:
     """Saves raw audio bytes to temp folder, returns path."""
-    temp_dir = os.path.join(os.path.dirname(__file__), "..", "temp")
+    import tempfile
+    temp_dir = os.path.join(tempfile.gettempdir(), "voicerx")
     os.makedirs(temp_dir, exist_ok=True)
     path = os.path.join(temp_dir, filename)
     with open(path, "wb") as f:

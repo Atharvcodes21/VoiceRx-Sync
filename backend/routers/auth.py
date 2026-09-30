@@ -16,7 +16,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env"))
 
 router = APIRouter()
 
-FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY", "AIzaSyBZpNUcc4q66rIl6_1-_vIIK1Om3XEsWYw")
+FIREBASE_API_KEY = os.getenv("FIREBASE_API_KEY", "")
 JWT_SECRET       = os.getenv("JWT_SECRET", "voicerx-super-secret-key")
 JWT_ALGORITHM    = "HS256"
 JWT_EXPIRE_HOURS = 72
@@ -27,11 +27,16 @@ class TokenRequest(BaseModel):
 
 
 def _verify_firebase_token(id_token: str) -> dict:
+    if not FIREBASE_API_KEY:
+        raise HTTPException(
+            status_code=500,
+            detail="FIREBASE_API_KEY is not configured in backend environment variables."
+        )
     url  = f"https://identitytoolkit.googleapis.com/v1/accounts:lookup?key={FIREBASE_API_KEY}"
     resp = requests.post(url, json={"idToken": id_token}, timeout=10)
     data = resp.json()
     if "error" in data:
-        raise HTTPException(status_code=401, detail="Invalid Firebase token")
+        raise HTTPException(status_code=401, detail=data.get("error", {}).get("message", "Invalid Firebase token"))
     users = data.get("users", [])
     if not users:
         raise HTTPException(status_code=401, detail="User not found")
